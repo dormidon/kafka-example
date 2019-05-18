@@ -47,8 +47,7 @@ public class SearchService implements Closeable {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         if (query.getText() != null) {
             boolQuery.must()
-                    .add(QueryBuilders
-                            .termQuery(FIELD_TEXT, query.getText()));
+                    .add(QueryBuilders.queryStringQuery(query.getText()));
         }
         if (query.getAuthorId() != null) {
             boolQuery.must()
