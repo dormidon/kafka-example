@@ -1,0 +1,70 @@
+version: '3.1'
+
+services:
+  
+  elastic:
+    image: elasticsearch:7.0.1
+    container_name: elastic
+    ports:
+    - 9200:9200
+    - 9300:9300
+    environment:
+    - discovery.type=single-node
+
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    container_name: zookeeper
+    ports:
+    - 2181:2181
+
+  kafka:
+    image: wurstmeister/kafka:0.10.2.0
+    container_name: kafka
+    ports:
+    - 9092:9092
+    hostname: localhost
+    links:
+    - zookeeper
+    environment:
+    - KAFKA_ADVERTISED_HOST_NAME
+    - KAFKA_ADVERTISED_PORT=9092
+    - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+    - KAFKA_CREATE_TOPICS=messages:1:1,read:1:1
+
+  kakfa_manager:
+    image: sheepkiller/kafka-manager:stable
+    container_name: kafka_manager
+    ports:
+    - 9000:9000
+    links:
+    - zookeeper
+    - kafka
+    environment:
+    - APPLICATION_SECRET=password
+    - ZK_HOSTS=zookeeper:2181
+
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    container_name: postgres
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_DB: channel
+      POSTGRES_USER: channel
+      POSTGRES_PASSWORD: password
+
+  adminer:
+    image: adminer:4.7
+    container_name: adminer
+    ports:
+    - 8081:8080
+    links:
+    - postgres
+
+  redis:
+    image: redis:5.0.5
+    container_name: redis
+    ports:
+    - 6379:6379    

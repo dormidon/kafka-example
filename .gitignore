@@ -5,6 +5,9 @@
 !.gitignore
 !*.java
 
+# Not Docker files
+!docker/**
+
 # And not Gradle Wrapper stuff
 !gradle/wrapper/*
 
