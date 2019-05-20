@@ -1,4 +1,4 @@
-package ru.mail.polis.channel.service;
+package ru.mail.polis.channel.service.classic;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -16,6 +16,8 @@ import ru.mail.polis.channel.ChannelService;
 import ru.mail.polis.channel.Message;
 import ru.mail.polis.channel.cache.ReadCache;
 import ru.mail.polis.channel.search.SearchService;
+import ru.mail.polis.channel.service.MessageIds;
+import ru.mail.polis.channel.service.ReadOnlyChannelService;
 import ru.mail.polis.channel.storage.StorageService;
 
 /**

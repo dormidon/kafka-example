@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import ru.mail.polis.channel.ChannelService;
 import ru.mail.polis.channel.cache.ReadCache;
 import ru.mail.polis.channel.search.SearchService;
-import ru.mail.polis.channel.service.DualWriteChannelService;
+import ru.mail.polis.channel.service.classic.DualWriteChannelService;
 import ru.mail.polis.channel.service.log.KafkaConfig;
 import ru.mail.polis.channel.service.log.LogWriteChannelService;
 import ru.mail.polis.channel.storage.StorageService;
