@@ -68,7 +68,7 @@ public class ReadEventConsumer implements Runnable {
         try {
             for (final ConsumerRecord<Long, ReadEvent> record : records) {
                 readCache.setLastRead(
-                        record.value().userId,
+                        record.value().user,
                         record.value().messageId);
             }
             return true;

@@ -33,7 +33,7 @@ public class MessageSerializer
             final MessageEvent event = new MessageEvent();
             event.id = message.getId();
             event.timestamp = Timestamp.valueOf(message.getCreateTime()).getTime();
-            event.userId = message.getAuthorId();
+            event.user = message.getUser();
             event.text = message.getText();
             return mapper.writeValueAsString(event).getBytes();
         } catch (Exception e) {

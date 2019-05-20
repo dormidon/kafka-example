@@ -51,11 +51,12 @@ public class DualWriteChannelService
     }
 
     @Override
-    public Message submit(final long userId, @NotNull final String text) {
+    public Message submit(@NotNull final String user,
+                          @NotNull final String text) {
         final Message message = new Message(
                 MessageIds.next(),
                 LocalDateTime.now(),
-                userId,
+                user,
                 text);
         pool.submit(() -> {
             try {
@@ -82,9 +83,9 @@ public class DualWriteChannelService
     }
 
     @Override
-    public void markReadUntil(final long userId,
+    public void markReadUntil(@NotNull final String user,
                               final long messageId) {
-        readCache.setLastRead(userId, messageId);
+        readCache.setLastRead(user, messageId);
     }
 
     @Override

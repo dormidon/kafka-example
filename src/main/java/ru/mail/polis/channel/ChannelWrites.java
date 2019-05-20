@@ -9,12 +9,12 @@ public interface ChannelWrites {
     /**
      * New message publication.
      */
-    Message submit(final long userId,
+    Message submit(@NotNull final String user,
                    @NotNull final String text);
 
     /**
      * Moving "waterline" of read messages for user.
      */
-    void markReadUntil(final long userId,
+    void markReadUntil(@NotNull final String user,
                        final long messageId);
 }

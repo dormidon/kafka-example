@@ -54,12 +54,12 @@ public class ReadOnlyChannelService
     }
 
     @Override
-    public boolean hasUnread(final long userId) {
+    public boolean hasUnread(@NotNull final String user) {
         final Optional<Long> last = readCache.getLast();
         if (last.isEmpty()) {
             return false;
         }
-        final Optional<Long> lastRead = readCache.getLastRead(userId);
+        final Optional<Long> lastRead = readCache.getLastRead(user);
         if (lastRead.isEmpty()) {
             return true;
         }

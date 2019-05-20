@@ -19,8 +19,8 @@ import ru.mail.polis.channel.Message;
  */
 @RestController
 public class ChannelController {
-    
-    private static final String H_USER = "x-uid";
+
+    private static final String H_USER = "x-user";
 
     private final ChannelService channelService;
 
@@ -31,9 +31,9 @@ public class ChannelController {
 
     @RequestMapping(value = "/messages", method = RequestMethod.POST, headers = H_USER)
     public Message submit(
-            @RequestBody final String text,
-            @RequestHeader(value = H_USER) final long userId) {
-        return channelService.submit(userId, text);
+            @RequestBody @NotNull final String text,
+            @RequestHeader(value = H_USER) @NotNull final String user) {
+        return channelService.submit(user, text);
     }
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
@@ -48,13 +48,13 @@ public class ChannelController {
     }
 
     @RequestMapping(value = "/messages/unread", method = RequestMethod.GET)
-    public boolean hasUnread(@RequestHeader(H_USER) final long userId) {
-        return channelService.hasUnread(userId);
+    public boolean hasUnread(@RequestHeader(H_USER) @NotNull final String user) {
+        return channelService.hasUnread(user);
     }
 
     @RequestMapping(value = "/messages/unread", method = RequestMethod.DELETE)
-    public void markRead(@RequestHeader(H_USER) final long userId,
+    public void markRead(@RequestHeader(H_USER) @NotNull final String user,
                          @RequestParam final long to) {
-        channelService.markReadUntil(userId, to);
+        channelService.markReadUntil(user, to);
     }
 }

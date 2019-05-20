@@ -2,6 +2,8 @@ package ru.mail.polis.channel;
 
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * "Read" part of the Channel Service.
  */
@@ -20,5 +22,5 @@ public interface ChannelReads {
     /**
      * Checks whether user has unread messages.
      */
-    boolean hasUnread(final long userId);
+    boolean hasUnread(@NotNull final String userId);
 }

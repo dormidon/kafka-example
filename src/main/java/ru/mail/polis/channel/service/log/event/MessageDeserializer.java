@@ -34,7 +34,7 @@ public class MessageDeserializer
             return new Message(
                     event.id,
                     new Timestamp(event.timestamp).toLocalDateTime(),
-                    event.userId,
+                    event.user,
                     event.text);
         } catch (Exception e) {
             log.error("Unable to deserialize Message", e);

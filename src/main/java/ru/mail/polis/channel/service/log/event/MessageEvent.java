@@ -5,7 +5,7 @@ package ru.mail.polis.channel.service.log.event;
  */
 public final class MessageEvent {
     public long id;
-    public long userId;
     public long timestamp;
+    public String user;
     public String text;
 }

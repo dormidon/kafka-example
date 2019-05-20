@@ -30,7 +30,7 @@ public class StorageService
                             rs.getLong("id"),
                             rs.getTimestamp("created")
                                     .toLocalDateTime(),
-                            rs.getLong("user_id"),
+                            rs.getString("user_name"),
                             rs.getString("text"));
 
     public StorageService(@NotNull final String host, final int port,
@@ -50,12 +50,12 @@ public class StorageService
         final HashMap<String, Object> parameters =
                 Maps.newHashMapWithExpectedSize(4);
         parameters.put("id", message.getId());
+        parameters.put("user_name", message.getUser());
         parameters.put("created", Timestamp.valueOf(message.getCreateTime()));
-        parameters.put("user_id", message.getAuthorId());
         parameters.put("text", message.getText());
         jdbc.update(
-                "INSERT INTO messages (id, user_id, created, text)\n" +
-                        "VALUES (:id, :user_id, :created, :text)",
+                "INSERT INTO messages (id, user_name, created, text)\n" +
+                        "VALUES (:id, :user_name, :created, :text)",
                 parameters);
     }
 
@@ -66,7 +66,7 @@ public class StorageService
         parameters.put("id", since);
         parameters.put("limit", count);
         return jdbc.query(
-                "SELECT id, user_id, created, text\n" +
+                "SELECT id, user_name, created, text\n" +
                         "FROM messages\n" +
                         "WHERE id >= :id\n" +
                         "ORDER BY id\n" +
@@ -81,7 +81,7 @@ public class StorageService
             return Collections.emptyList();
         }
         return jdbc.query(
-                "SELECT id, user_id, created, text\n" +
+                "SELECT id, user_name, created, text\n" +
                         "FROM messages\n" +
                         "WHERE id IN (:ids)\n" +
                         "ORDER BY id",

@@ -21,7 +21,7 @@ class StorageServiceTest {
     @Test
     void roundTrip() {
         final Message message =
-                new Message(6, LocalDateTime.now(), 100L, "Foo");
+                new Message(6, LocalDateTime.now(), "Alice", "Foo");
         storage.write(message);
         assertEquals(
                 Collections.singletonList(message),
@@ -34,7 +34,7 @@ class StorageServiceTest {
         
         for (int i = 0; i < 10; i++) {
             final Message message =
-                    new Message(i + 300, LocalDateTime.now(), 200L, "Text " + i);
+                    new Message(i + 300, LocalDateTime.now(), "Bob", "Text " + i);
             messages.add(message);
             storage.write(message);
         }

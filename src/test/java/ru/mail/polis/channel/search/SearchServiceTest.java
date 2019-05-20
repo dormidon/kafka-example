@@ -20,7 +20,7 @@ class SearchServiceTest {
     @Test
     void singleDocument() throws IOException {
         final Message message =
-                new Message(1L, LocalDateTime.now(), 2L, "brown fox");
+                new Message(1L, LocalDateTime.now(), "Alice", "brown fox");
         searchService.index(message);
 
         final SearchResult found = searchService.search(

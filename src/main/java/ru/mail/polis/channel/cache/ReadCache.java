@@ -35,13 +35,13 @@ public class ReadCache
         write(LAST_MESSAGE_KEY, messageId);
     }
 
-    public Optional<Long> getLastRead(final long userId) {
-        return read(lastReadKey(userId));
+    public Optional<Long> getLastRead(@NotNull final String user) {
+        return read(lastReadKey(user));
     }
 
-    public void setLastRead(final long userId,
+    public void setLastRead(@NotNull final String user,
                             final long messageId) {
-        write(lastReadKey(userId), messageId);
+        write(lastReadKey(user), messageId);
     }
 
     private Optional<Long> read(@NotNull final byte[] key) {
@@ -55,8 +55,8 @@ public class ReadCache
         jedis.set(key, Longs.toByteArray(value));
     }
 
-    private static byte[] lastReadKey(final long userId) {
-        return ("r:" + userId).getBytes(Charsets.UTF_8);
+    private static byte[] lastReadKey(@NotNull final String user) {
+        return ("r:" + user).getBytes(Charsets.UTF_8);
     }
 
     @Override

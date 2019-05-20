@@ -12,6 +12,8 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.jetbrains.annotations.NotNull;
 
+import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import ru.mail.polis.channel.ChannelService;
 import ru.mail.polis.channel.Message;
@@ -112,18 +114,18 @@ public class LogWriteChannelService
     }
 
     @Override
-    public Message submit(final long userId,
+    public Message submit(@NotNull final String user,
                           @NotNull final String text) {
         final Message message = new Message(
                 MessageIds.next(),
                 LocalDateTime.now(),
-                userId,
+                user,
                 text);
 
         messageProducer.send(
                 new ProducerRecord<>(
                         kafkaConfig.getMessagesTopic(),
-                        getUserPartition(kafkaConfig.getMessagesTopic(), userId),
+                        getUserPartition(kafkaConfig.getMessagesTopic(), user),
                         message.getId(),
                         message));
 
@@ -131,24 +133,30 @@ public class LogWriteChannelService
     }
 
     @Override
-    public void markReadUntil(final long userId,
+    public void markReadUntil(@NotNull final String user,
                               final long messageId) {
         final ReadEvent event = new ReadEvent();
-        event.userId = userId;
+        event.user = user;
         event.messageId = messageId;
+        final long key = Hashing
+                .goodFastHash(32)
+                .newHasher()
+                .putString(user, Charsets.UTF_8)
+                .putLong(messageId).hash()
+                .padToLong();
         readEventProducer.send(
                 new ProducerRecord<>(
                         kafkaConfig.getReadTopic(),
-                        getUserPartition(kafkaConfig.getReadTopic(), userId),
-                        userId,
+                        getUserPartition(kafkaConfig.getReadTopic(), user),
+                        key,
                         event));
     }
 
     // We need to route events from the same user to the same partition,
     // since we have ordering guaranties only within single partition.
     private int getUserPartition(@NotNull final String topic,
-                                 final long userId) {
-        return (int) (userId % messageProducer.partitionsFor(topic).size());
+                                 @NotNull final String user) {
+        return (user.hashCode() % messageProducer.partitionsFor(topic).size());
     }
 
     @Override
