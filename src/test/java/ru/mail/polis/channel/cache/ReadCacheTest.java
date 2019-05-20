@@ -22,5 +22,4 @@ class ReadCacheTest {
         cache.setLastRead(111L, 999L);
         assertEquals(Optional.of(999L), cache.getLastRead(111L));
     }
-    
 }

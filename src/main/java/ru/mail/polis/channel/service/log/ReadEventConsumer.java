@@ -9,26 +9,28 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.mail.polis.channel.Message;
 import ru.mail.polis.channel.cache.ReadCache;
+import ru.mail.polis.channel.service.log.event.ReadEvent;
 
 /**
- * Consumes {@link Message}s and moves waterline of last message.
+ * Consumes {@link ReadEvent}s and moves waterline
+ * of last read message for particular user.
+ * <p>
  * This consumer easily may be a separate application supported by
  * other developer team.
  */
-public class CacheConsumer implements Runnable {
+public class ReadEventConsumer implements Runnable {
 
     private static final Logger log =
-            LoggerFactory.getLogger(CacheConsumer.class);
+            LoggerFactory.getLogger(ReadEventConsumer.class);
 
-    private final Consumer<Long, Message> consumer;
+    private final Consumer<Long, ReadEvent> consumer;
     private final ReadCache readCache;
     private final BooleanSupplier stop;
 
-    CacheConsumer(@NotNull final Consumer<Long, Message> consumer,
-                  @NotNull final ReadCache readCache,
-                  @NotNull final BooleanSupplier stop) {
+    ReadEventConsumer(@NotNull final Consumer<Long, ReadEvent> consumer,
+                      @NotNull final ReadCache readCache,
+                      @NotNull final BooleanSupplier stop) {
         this.consumer = consumer;
         this.readCache = readCache;
         this.stop = stop;
@@ -36,10 +38,10 @@ public class CacheConsumer implements Runnable {
 
     @Override
     public void run() {
-        log.info("Start consuming messages for ReadCache");
+        log.info("Start consuming ReadEvents for ReadCache");
 
         while (!stop.getAsBoolean()) {
-            final ConsumerRecords<Long, Message> poll =
+            final ConsumerRecords<Long, ReadEvent> poll =
                     consumer.poll(1000);
 
             if (poll.count() > 0) {
@@ -57,25 +59,21 @@ public class CacheConsumer implements Runnable {
             }
         }
 
-        log.info("Stop consuming messages for ReadCache");
+        log.info("Stop consuming ReadEvent for ReadCache");
 
         consumer.close();
     }
 
-    private boolean cache(final ConsumerRecords<Long, Message> records) {
+    private boolean cache(final ConsumerRecords<Long, ReadEvent> records) {
         try {
-            long last = 0;
-            for (final ConsumerRecord<Long, Message> record : records) {
-                if (record.value().getId() > last) {
-                    last = record.value().getId();
-                }
-            }
-            if (last > 0) {
-                readCache.setLast(last);
+            for (final ConsumerRecord<Long, ReadEvent> record : records) {
+                readCache.setLastRead(
+                        record.value().userId,
+                        record.value().messageId);
             }
             return true;
         } catch (Exception e) {
-            log.error("Error while consuming messages for cache", e);
+            log.error("Error while consuming ReadEvent for cache", e);
             return false;
         }
     }

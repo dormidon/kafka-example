@@ -21,7 +21,7 @@ import ru.mail.polis.channel.storage.StorageService;
 /**
  * Not the most successful "write" part Channel Service implementation.
  * It should know about all backed systems and writes concurrently to them:
- * to the main storage, to the full-test search engine, ant to the cache.
+ * to the main storage, to the full-test search engine, and to the cache.
  * <p>
  * The implementation is prone to races and perpetual inconsistency
  * among backed storage systems.
@@ -49,7 +49,7 @@ public class DualWriteChannelService
     }
 
     @Override
-    public Message submit(final long userId, final String text) {
+    public Message submit(final long userId, @NotNull final String text) {
         final Message message = new Message(
                 MessageIds.next(),
                 LocalDateTime.now(),

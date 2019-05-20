@@ -1,6 +1,5 @@
 package ru.mail.polis.channel.service.log.event;
 
-import java.sql.Timestamp;
 import java.util.Map;
 
 import org.apache.kafka.common.serialization.Serializer;
@@ -9,35 +8,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ru.mail.polis.channel.Message;
 
 /**
- * Writes {@link Message} to Kafka topic.
+ * Writes {@link ReadEvent} to Kafka topic.
  */
-public class MessageSerializer
-        implements Serializer<Message> {
+public class ReadEventSerializer
+        implements Serializer<ReadEvent> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(MessageSerializer.class);
+            LoggerFactory.getLogger(ReadEventSerializer.class);
 
     @Override
-    public void configure(final Map<String, ?> configs, final boolean isKey) {
+    public void configure(final Map<String, ?> configs,
+                          final boolean isKey) {
         // nothing to do
     }
 
     @Override
     public byte[] serialize(@NotNull final String topic,
-                            @NotNull final Message message) {
+                            @NotNull final ReadEvent event) {
         final ObjectMapper mapper = new ObjectMapper();
         try {
-            final MessageEvent event = new MessageEvent();
-            event.id = message.getId();
-            event.timestamp = Timestamp.valueOf(message.getCreateTime()).getTime();
-            event.userId = message.getAuthorId();
-            event.text = message.getText();
             return mapper.writeValueAsString(event).getBytes();
         } catch (Exception e) {
-            log.error("Error while serialize Message", e);
+            log.error("Error while serialize ReadEvent", e);
             return null;
         }
     }
@@ -47,3 +41,4 @@ public class MessageSerializer
         // nothing to do
     }
 }
+

@@ -14,7 +14,6 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -28,33 +27,23 @@ import ru.mail.polis.channel.Message;
 public class SearchService implements Closeable {
 
     private static final String FIELD_TEXT = "text";
-    private static final String FIELD_AUTHOR = "author_id";
 
     private final RestHighLevelClient client;
     private final String indexName;
 
-    public SearchService(@NotNull String indexName,
-                         @NotNull String host, int port) {
+    public SearchService(@NotNull final String indexName,
+                         @NotNull final String host, 
+                         final int port) {
         this.indexName = indexName;
         this.client = new RestHighLevelClient(
                 RestClient.builder(new HttpHost(host, port)));
     }
 
     @NotNull
-    public SearchResult search(@NotNull final SearchQuery query,
+    public SearchResult search(@NotNull final String query,
                                @NotNull final Paging paging) throws IOException {
         final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        if (query.getText() != null) {
-            boolQuery.must()
-                    .add(QueryBuilders.queryStringQuery(query.getText()));
-        }
-        if (query.getAuthorId() != null) {
-            boolQuery.must()
-                    .add(QueryBuilders
-                            .termQuery(FIELD_AUTHOR, query.getAuthorId()));
-        }
-        sourceBuilder.query(boolQuery);
+        sourceBuilder.query(QueryBuilders.queryStringQuery(query));
         sourceBuilder.from(paging.getOffset());
         sourceBuilder.size(paging.getCount());
 
@@ -63,24 +52,23 @@ public class SearchService implements Closeable {
                         .indices(indexName)
                         .source(sourceBuilder);
 
-        SearchResponse searchResponse =
+        final SearchResponse searchResponse =
                 client.search(searchRequest, RequestOptions.DEFAULT);
 
         final List<Long> ids =
                 Streams.stream(searchResponse.getHits())
                         .map(hit -> Long.parseLong(hit.getId()))
                         .collect(Collectors.toList());
+        
         return new SearchResult(
                 ids,
                 searchResponse.getHits().getTotalHits().value);
-
     }
 
     public void index(@NotNull final Message message) throws IOException {
         final XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
         {
-            builder.field(FIELD_AUTHOR, message.getAuthorId());
             builder.field(FIELD_TEXT, message.getText());
         }
         builder.endObject();

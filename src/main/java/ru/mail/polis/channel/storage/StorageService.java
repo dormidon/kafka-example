@@ -29,7 +29,7 @@ public class StorageService
                     new Message(
                             rs.getLong("id"),
                             rs.getTimestamp("created")
-                                    .toLocalDateTime(), 
+                                    .toLocalDateTime(),
                             rs.getLong("user_id"),
                             rs.getString("text"));
 
@@ -47,8 +47,8 @@ public class StorageService
     }
 
     public void write(@NotNull final Message message) {
-        
-        final HashMap<String, Object> parameters = Maps.newHashMapWithExpectedSize(4);
+        final HashMap<String, Object> parameters =
+                Maps.newHashMapWithExpectedSize(4);
         parameters.put("id", message.getId());
         parameters.put("created", Timestamp.valueOf(message.getCreateTime()));
         parameters.put("user_id", message.getAuthorId());
@@ -61,7 +61,8 @@ public class StorageService
 
     public List<Message> read(final long since,
                               final int count) {
-        final HashMap<String, Object> parameters = Maps.newHashMapWithExpectedSize(4);
+        final HashMap<String, Object> parameters =
+                Maps.newHashMapWithExpectedSize(2);
         parameters.put("id", since);
         parameters.put("limit", count);
         return jdbc.query(
@@ -84,7 +85,7 @@ public class StorageService
                         "FROM messages\n" +
                         "WHERE id IN (:ids)\n" +
                         "ORDER BY id",
-                        Collections.singletonMap("ids", ids),
+                Collections.singletonMap("ids", ids),
                 MESSAGE_ROW_MAPPER
         );
     }

@@ -2,6 +2,7 @@ package ru.mail.polis.channel.api;
 
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,40 +19,42 @@ import ru.mail.polis.channel.Message;
  */
 @RestController
 public class ChannelController {
+    
+    private static final String H_USER = "x-uid";
 
     private final ChannelService channelService;
 
     @Autowired
-    public ChannelController(final ChannelService channelService) {
+    public ChannelController(@NotNull final ChannelService channelService) {
         this.channelService = channelService;
     }
 
-    @RequestMapping(value = "/messages", method = RequestMethod.POST, headers = "x-uid")
+    @RequestMapping(value = "/messages", method = RequestMethod.POST, headers = H_USER)
     public Message submit(
-            @RequestBody String text,
-            @RequestHeader(value = "x-uid") long userId) {
+            @RequestBody final String text,
+            @RequestHeader(value = H_USER) final long userId) {
         return channelService.submit(userId, text);
     }
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
-    public List<Message> messages(@RequestParam long since,
-                                  @RequestParam(defaultValue = "10") int count) {
+    public List<Message> messages(@RequestParam final long since,
+                                  @RequestParam(defaultValue = "10") final int count) {
         return channelService.listMessages(since, count);
     }
 
     @RequestMapping(value = "/messages/search", method = RequestMethod.GET)
-    public List<Message> search(@RequestParam String query) {
+    public List<Message> search(@RequestParam final String query) {
         return channelService.searchMessages(query);
     }
 
     @RequestMapping(value = "/messages/unread", method = RequestMethod.GET)
-    public boolean hasUnread(@RequestHeader("x-uid") long userId) {
+    public boolean hasUnread(@RequestHeader(H_USER) final long userId) {
         return channelService.hasUnread(userId);
     }
 
     @RequestMapping(value = "/messages/unread", method = RequestMethod.DELETE)
-    public void markRead(@RequestHeader("x-uid") long userId,
-                         @RequestParam long to) {
+    public void markRead(@RequestHeader(H_USER) final long userId,
+                         @RequestParam final long to) {
         channelService.markReadUntil(userId, to);
     }
 }

@@ -20,11 +20,14 @@ public class MessageDeserializer
             LoggerFactory.getLogger(MessageDeserializer.class);
 
     @Override
-    public void configure(Map<String, ?> configs, boolean isKey) {
+    public void configure(final Map<String, ?> configs,
+                          final boolean isKey) {
+        // nothing to do
     }
 
     @Override
-    public Message deserialize(String topic, byte[] data) {
+    public Message deserialize(final String topic,
+                               final byte[] data) {
         final ObjectMapper mapper = new ObjectMapper();
         try {
             final MessageEvent event = mapper.readValue(data, MessageEvent.class);
@@ -41,5 +44,6 @@ public class MessageDeserializer
 
     @Override
     public void close() {
+        // nothing to do
     }
 }

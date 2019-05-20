@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.google.common.base.Charsets;
 import com.google.common.primitives.Longs;
 import redis.clients.jedis.Jedis;
@@ -20,7 +22,7 @@ public class ReadCache
 
     private final Jedis jedis;
 
-    public ReadCache(final String host,
+    public ReadCache(@NotNull final String host,
                      final int port) {
         this.jedis = new Jedis(host, port);
     }
@@ -42,13 +44,14 @@ public class ReadCache
         write(lastReadKey(userId), messageId);
     }
 
-    private Optional<Long> read(final byte[] key) {
+    private Optional<Long> read(@NotNull final byte[] key) {
         return Optional
                 .ofNullable(jedis.get(key))
                 .map(Longs::fromByteArray);
     }
 
-    private void write(final byte[] key, final long value) {
+    private void write(@NotNull final byte[] key,
+                       final long value) {
         jedis.set(key, Longs.toByteArray(value));
     }
 

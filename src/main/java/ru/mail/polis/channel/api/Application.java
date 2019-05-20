@@ -10,7 +10,7 @@ import ru.mail.polis.channel.ChannelService;
 import ru.mail.polis.channel.cache.ReadCache;
 import ru.mail.polis.channel.search.SearchService;
 import ru.mail.polis.channel.service.DualWriteChannelService;
-import ru.mail.polis.channel.service.log.KafkaConfiguration;
+import ru.mail.polis.channel.service.log.KafkaConfig;
 import ru.mail.polis.channel.service.log.LogWriteChannelService;
 import ru.mail.polis.channel.storage.StorageService;
 
@@ -21,7 +21,7 @@ import ru.mail.polis.channel.storage.StorageService;
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 public class Application {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
@@ -34,12 +34,12 @@ public class Application {
     }
 
     @Bean(destroyMethod = "close")
-    ChannelService logWriteChanneldService() {
+    ChannelService logWriteChannelService() {
         return new LogWriteChannelService(
                 storageService(),
                 searchService(),
                 readCache(),
-                kafka());
+                kafkaConfig());
     }
 
     private SearchService searchService() {
@@ -58,11 +58,10 @@ public class Application {
                 "channel");
     }
 
-    private KafkaConfiguration kafka() {
-        return new KafkaConfiguration(
+    private KafkaConfig kafkaConfig() {
+        return new KafkaConfig(
                 "localhost:9092",
                 "messages",
                 "read");
     }
-
 }

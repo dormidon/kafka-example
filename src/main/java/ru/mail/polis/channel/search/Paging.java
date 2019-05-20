@@ -7,7 +7,8 @@ public class Paging {
     private final int offset;
     private final int count;
 
-    public Paging(int offset, int count) {
+    public Paging(final int offset,
+                  final int count) {
         this.offset = offset;
         this.count = count;
     }

@@ -14,12 +14,13 @@ public class SearchResult {
     private final List<Long> ids;
     private final long totalCount;
 
-    public SearchResult(@NotNull final List<Long> ids,
-                        long totalCount) {
+    SearchResult(@NotNull final List<Long> ids,
+                 long totalCount) {
         this.ids = ids;
         this.totalCount = totalCount;
     }
 
+    @NotNull
     public List<Long> getIds() {
         return ids;
     }

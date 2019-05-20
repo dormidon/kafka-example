@@ -8,7 +8,7 @@ import com.google.common.base.MoreObjects;
 /**
  * Single message in the channel.
  */
-public class Message {
+public final class Message {
     private final long id;
     private final LocalDateTime createTime;
     private final long authorId;

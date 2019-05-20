@@ -19,6 +19,11 @@ import ru.mail.polis.channel.cache.ReadCache;
 import ru.mail.polis.channel.search.SearchService;
 import ru.mail.polis.channel.service.MessageIds;
 import ru.mail.polis.channel.service.ReadOnlyChannelService;
+import ru.mail.polis.channel.service.log.event.MessageDeserializer;
+import ru.mail.polis.channel.service.log.event.MessageSerializer;
+import ru.mail.polis.channel.service.log.event.ReadEvent;
+import ru.mail.polis.channel.service.log.event.ReadEventDeserializer;
+import ru.mail.polis.channel.service.log.event.ReadEventSerializer;
 import ru.mail.polis.channel.storage.StorageService;
 
 /**
@@ -35,61 +40,80 @@ public class LogWriteChannelService
 
     private final ExecutorService pool;
     private final Producer<Long, Message> messageProducer;
+    private final Producer<Long, ReadEvent> readEventProducer;
     private final AtomicBoolean stop;
-    private final KafkaConfiguration kafka;
+    private final KafkaConfig kafkaConfig;
 
     public LogWriteChannelService(
             @NotNull final StorageService storageService,
             @NotNull final SearchService searchService,
             @NotNull final ReadCache readCache,
-            @NotNull final KafkaConfiguration kafka) {
+            @NotNull final KafkaConfig kafkaConfig) {
         super(storageService, searchService, readCache);
 
         this.stop = new AtomicBoolean();
-        this.kafka = kafka;
+        this.kafkaConfig = kafkaConfig;
 
-        this.pool = new ThreadPoolExecutor(3, 3,
+        this.pool = new ThreadPoolExecutor(4, 4,
                 1, TimeUnit.MINUTES, new ArrayBlockingQueue<>(100),
                 new ThreadFactoryBuilder()
                         .setNameFormat("log-writes-%d")
                         .build());
 
         this.messageProducer = KafkaComponents.createProducer(
-                kafka.getBootstrapServers(),
-                "channel-service");
+                kafkaConfig.getBootstrapServers(),
+                "message-producer",
+                new MessageSerializer());
+
+        this.readEventProducer = KafkaComponents.createProducer(
+                kafkaConfig.getBootstrapServers(),
+                "read-event-producer",
+                new ReadEventSerializer());
 
         pool.submit(
                 new StorageConsumer(
                         KafkaComponents.createConsumer(
-                                kafka.getBootstrapServers(),
+                                kafkaConfig.getBootstrapServers(),
                                 "storage-consumer",
-                                kafka.getMessagesTopic()),
+                                kafkaConfig.getMessagesTopic(),
+                                new MessageDeserializer()),
                         storageService,
                         stop::get));
 
         pool.submit(
                 new IndexConsumer(
                         KafkaComponents.createConsumer(
-                                kafka.getBootstrapServers(),
+                                kafkaConfig.getBootstrapServers(),
                                 "search-consumer",
-                                kafka.getMessagesTopic()),
+                                kafkaConfig.getMessagesTopic(),
+                                new MessageDeserializer()),
                         searchService,
                         stop::get));
 
         pool.submit(
                 new CacheConsumer(
                         KafkaComponents.createConsumer(
-                                kafka.getBootstrapServers(),
-                                "cache-consumer",
-                                kafka.getMessagesTopic()),
+                                kafkaConfig.getBootstrapServers(),
+                                "cache-message-consumer",
+                                kafkaConfig.getMessagesTopic(),
+                                new MessageDeserializer()),
                         readCache,
                         stop::get));
 
+        pool.submit(
+                new ReadEventConsumer(
+                        KafkaComponents.createConsumer(
+                                kafkaConfig.getBootstrapServers(),
+                                "cache-reads-consumer",
+                                kafkaConfig.getReadTopic(),
+                                new ReadEventDeserializer()),
+                        readCache,
+                        stop::get));
     }
 
     @Override
     public Message submit(final long userId,
-                          final String text) {
+                          @NotNull final String text) {
         final Message message = new Message(
                 MessageIds.next(),
                 LocalDateTime.now(),
@@ -98,7 +122,8 @@ public class LogWriteChannelService
 
         messageProducer.send(
                 new ProducerRecord<>(
-                        kafka.getMessagesTopic(),
+                        kafkaConfig.getMessagesTopic(),
+                        getUserPartition(kafkaConfig.getMessagesTopic(), userId),
                         message.getId(),
                         message));
 
@@ -107,13 +132,32 @@ public class LogWriteChannelService
 
     @Override
     public void markReadUntil(final long userId,
-                              final long text) {
-        //
+                              final long messageId) {
+        final ReadEvent event = new ReadEvent();
+        event.userId = userId;
+        event.messageId = messageId;
+        readEventProducer.send(
+                new ProducerRecord<>(
+                        kafkaConfig.getReadTopic(),
+                        getUserPartition(kafkaConfig.getReadTopic(), userId),
+                        userId,
+                        event));
+    }
+
+    // We need to route events from the same user to the same partition,
+    // since we have ordering guaranties only within single partition.
+    private int getUserPartition(@NotNull final String topic,
+                                 final long userId) {
+        return (int) (userId % messageProducer.partitionsFor(topic).size());
     }
 
     @Override
     public void close() throws IOException {
-        // Stop consuming from Kafka
+        // Stop producing events to Kafka
+        messageProducer.close();
+        readEventProducer.close();
+
+        // Stop consuming events from Kafka
         stop.set(true);
 
         pool.shutdown();

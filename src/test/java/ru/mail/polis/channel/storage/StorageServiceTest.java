@@ -31,15 +31,18 @@ class StorageServiceTest {
     @Test
     void getByIds() {
         final List<Message> messages = new ArrayList<>(10);
+        
         for (int i = 0; i < 10; i++) {
             final Message message =
                     new Message(i + 300, LocalDateTime.now(), 200L, "Text " + i);
             messages.add(message);
             storage.write(message);
         }
-        List<Message> initialOddMessages = messages.stream()
+        
+        final List<Message> initialOddMessages = messages.stream()
                 .filter(x -> x.getId() % 2 == 0)
                 .collect(Collectors.toList());
+        
         assertEquals(initialOddMessages,
                 storage.get(
                         initialOddMessages.stream()

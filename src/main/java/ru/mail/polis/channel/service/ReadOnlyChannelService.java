@@ -11,7 +11,6 @@ import ru.mail.polis.channel.ChannelReads;
 import ru.mail.polis.channel.Message;
 import ru.mail.polis.channel.cache.ReadCache;
 import ru.mail.polis.channel.search.Paging;
-import ru.mail.polis.channel.search.SearchQuery;
 import ru.mail.polis.channel.search.SearchResult;
 import ru.mail.polis.channel.search.SearchService;
 import ru.mail.polis.channel.storage.StorageService;
@@ -42,11 +41,11 @@ public class ReadOnlyChannelService
     }
 
     @Override
-    public List<Message> searchMessages(final String text) {
+    public List<Message> searchMessages(@NotNull final String text) {
         try {
             final SearchResult found =
                     searchService.search(
-                            new SearchQuery(text),
+                            text,
                             new Paging(0, 10));
             return storageService.get(found.getIds());
         } catch (IOException e) {

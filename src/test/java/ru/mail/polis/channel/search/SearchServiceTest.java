@@ -10,9 +10,6 @@ import ru.mail.polis.channel.Message;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * TODO:
- */
 class SearchServiceTest {
 
     private final SearchService searchService =
@@ -27,13 +24,13 @@ class SearchServiceTest {
         searchService.index(message);
 
         final SearchResult found = searchService.search(
-                new SearchQuery("fox"),
+                "fox",
                 new Paging(0, 10));
         assertEquals(1, found.getTotalCount());
         assertTrue(found.getIds().contains(message.getId()));
 
         final SearchResult notFound = searchService.search(
-                new SearchQuery("bear"),
+                "bear",
                 new Paging(0, 10));
         assertEquals(0, notFound.getTotalCount());
         assertTrue(notFound.getIds().isEmpty());

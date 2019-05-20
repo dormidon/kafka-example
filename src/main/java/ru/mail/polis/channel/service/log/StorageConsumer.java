@@ -14,12 +14,11 @@ import ru.mail.polis.channel.search.SearchService;
 import ru.mail.polis.channel.storage.StorageService;
 
 /**
- * Consumes {@link Message}s and save them to main storage.
+ * Consumes {@link Message}s and saves them to main storage.
  * This consumer easily may be a separate application supported by
  * other developer team.
  */
-class StorageConsumer
-        implements Runnable {
+class StorageConsumer implements Runnable {
 
     private static final Logger log =
             LoggerFactory.getLogger(StorageConsumer.class);
@@ -38,7 +37,6 @@ class StorageConsumer
 
     @Override
     public void run() {
-
         log.info("Start consuming messages for StorageService");
 
         while (!stop.getAsBoolean()) {

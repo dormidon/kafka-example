@@ -26,12 +26,12 @@ services:
     links:
     - zookeeper
     environment:
-    - KAFKA_ADVERTISED_HOST_NAME
+    - KAFKA_ADVERTISED_HOST_NAME=localhost
     - KAFKA_ADVERTISED_PORT=9092
     - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
     - KAFKA_CREATE_TOPICS=messages:1:1,read:1:1
 
-  kakfa_manager:
+  kafka_manager:
     image: sheepkiller/kafka-manager:stable
     container_name: kafka_manager
     ports:
@@ -67,4 +67,4 @@ services:
     image: redis:5.0.5
     container_name: redis
     ports:
-    - 6379:6379    
+    - 6379:6379

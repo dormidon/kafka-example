@@ -17,8 +17,7 @@ import ru.mail.polis.channel.search.SearchService;
  * This consumer easily may be a separate application supported by
  * other developer team.
  */
-class IndexConsumer
-        implements Runnable {
+class IndexConsumer implements Runnable {
 
     private static final Logger log =
             LoggerFactory.getLogger(IndexConsumer.class);
@@ -74,6 +73,4 @@ class IndexConsumer
             return false;
         }
     }
-
-
 }
