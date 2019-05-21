@@ -1,5 +1,6 @@
 package ru.mail.polis.channel.api;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,21 +26,22 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    //@Bean(destroyMethod = "close")
-    ChannelService dualWritesChannelService() {
-        return new DualWriteChannelService(
-                storageService(),
-                searchService(),
-                readCache());
-    }
-
     @Bean(destroyMethod = "close")
-    ChannelService logWriteChannelService() {
-        return new LogWriteChannelService(
-                storageService(),
-                searchService(),
-                readCache(),
-                kafkaConfig());
+    ChannelService channelService(@Value("${channelService}") final String impl) {
+        if ("dual-write".equalsIgnoreCase(impl)) {
+            return new DualWriteChannelService(
+                    storageService(),
+                    searchService(),
+                    readCache());
+        } else if ("log-write".equalsIgnoreCase(impl)) {
+            return new LogWriteChannelService(
+                    storageService(),
+                    searchService(),
+                    readCache(),
+                    kafkaConfig());
+        } else {
+            throw new IllegalArgumentException("Unknown ChannelService impl: " + impl);
+        }
     }
 
     private SearchService searchService() {
