@@ -1,2 +1,24 @@
-*.class
-*.log
+# Ignore everything
+*
+
+# But not Java files...
+!.gitignore
+!*.java
+!src/**
+
+# Not Docker files
+!docker/**
+
+# And not Gradle Wrapper stuff
+!gradle/wrapper/*
+
+# And CI
+!.travis.yml
+!build.gradle.kts
+!gradlew
+!LICENSE
+!README.md
+!settings.gradle
+
+# ...even if they are in subdirectories
+!*/
