@@ -68,3 +68,21 @@ services:
     container_name: redis
     ports:
     - 6379:6379
+    
+  zoonavigator_web:
+    image: elkozmon/zoonavigator-web:0.6.1
+    container_name: zoonavigator-web
+    ports:
+    - 8001:8001
+    environment:
+      WEB_HTTP_PORT: 8001
+      API_HOST: zoonavigator_api
+      API_PORT: 9001
+    depends_on:
+    - zoonavigator_api
+  zoonavigator_api:
+    image: elkozmon/zoonavigator-api:0.6.1
+    container_name: zoonavigator-api
+    environment:
+      API_HTTP_PORT: 9001
+  
