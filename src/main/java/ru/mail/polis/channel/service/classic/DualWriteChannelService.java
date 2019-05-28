@@ -62,7 +62,7 @@ public class DualWriteChannelService
             try {
                 storageService.write(message);
             } catch (Exception e) {
-                log.error("Error while submit update to ReadCache", e);
+                log.error("Error while submit update to StorageService", e);
             }
         });
         pool.submit(() -> {
